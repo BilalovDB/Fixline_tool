@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { CtrlTokenizer, Token, TokensInLine } from './CtrlTokenizer';
-import { GetProjectsInConfigFile } from './CtrlComands';
+import { GetProjectsInConfigFile } from './СtrlComands';
 import { varTypes } from './CtrlVarTypes';
 import { DocumentSymbol } from 'vscode';
 
@@ -833,41 +833,10 @@ export class CtrlAllSymbols extends CtrlSymbols {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * -------------------------------------------------------------------------------------------------------------------------------------------------
- * -------------------------------------------------------------------------------------------------------------------------------------------------
- * -------------------------------------------------------------------------------------------------------------------------------------------------
- * -------------------------------------------------------------------------------------------------------------------------------------------------
- * -------------------------------------------------------------------------------------------------------------------------------------------------
- * -------------------------------------------------------------------------------------------------------------------------------------------------
- */
 export class CtrlPublicSymbols extends CtrlSymbols {
-    public getPublicMembers(filesRead: string[] = []) {
+    private isIncludeProtected = false;
+    public getPublicMembers(filesRead: string[] = [], isIncludeProtected = false) {
+        this.isIncludeProtected = isIncludeProtected;
         this.filesRead = filesRead;
         let token = this.tokenizer.getNextToken();
         while (token != null) {
@@ -967,7 +936,8 @@ export class CtrlPublicSymbols extends CtrlSymbols {
         let countScope = 1;
         let member = this.tokenizer.getNextToken();
         while (member != null) {
-            if (member.symbol == 'public') {
+            if (member.symbol == 'public' || (this.isIncludeProtected && member.symbol == 'protected')) {
+                member = this.tokenizer.getNextToken();
                 const varType = this.getTypeVariableAndModidfiers(member);
                 if (varType) {
                     let memberName = null;
